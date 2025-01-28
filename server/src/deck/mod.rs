@@ -1,68 +1,94 @@
-//! This module contains the implementation of the deck of cards.
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-
-/// Represents the rank of a card.
-pub enum Rank {
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Ten,
-    Jack,
-    Queen,
-    King,
-    Ace,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Suit {
-    Spades,
-    Hearts,
-    Clubs,
-    Diamonds,
-}
-
-/// Represents a card in the deck.
+#[derive(Debug, Clone)]
 pub struct Card {
-    /// The suit of the card.
-    pub suit: Suit,
-    /// The rank of the card.
-    pub rank: Rank,
+    pub suit: char, // 'H', 'D', 'C', 'S'
+    pub rank: String, // "2" to "10", "J", "Q", "K", "A"
 }
 
 pub struct Deck {
-    pub cards: Vec<Card>,
+    cards: Vec<Card>,
+    original_deck: Vec<Card>, // Store the original 52-card deck for resetting
 }
 
+impl Deck {
+    // Create a new 52-card deck
+    pub fn new() -> Self {
+        let suits = ['H', 'D', 'C', 'S']; // Hearts, Diamonds, Clubs, Spades
+        let ranks = vec![
+            "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A",
+        ];
 
-impl Deck{
-    /// Creates a new deck of cards.
-    pub fn new() -> Deck {
         let mut cards = Vec::new();
-        for suit in &[Suit::Spades, Suit::Hearts, Suit::Clubs, Suit::Diamonds] {
-            for &rank in &[Rank::Two, Rank::Three, Rank::Four, Rank::Five, Rank::Six, Rank::Seven, Rank::Eight, Rank::Nine, Rank::Ten, Rank::Jack, Rank::Queen, Rank::King, Rank::Ace] {
-                cards.push(Card { suit: suit.clone(), rank });
+        for &suit in &suits {
+            for rank in &ranks {
+                cards.push(Card {
+                    suit,
+                    rank: rank.to_string(),
+                });
             }
         }
-        Deck { cards }
-    }
-    /// Shuffles the deck of cards.
-    pub fn shuffle(&mut self) {
-        use rand::seq::SliceRandom;
-        use rand::thread_rng;
 
+        // Store the original deck for resetting
+        let original_deck = cards.clone();
+
+        Self { cards, original_deck }
+    }
+
+    // Shuffle the deck
+    pub fn shuffle(&mut self) {
         let mut rng = thread_rng();
         self.cards.shuffle(&mut rng);
     }
 
-    /// Deals a card from the deck.
-    pub fn deal(&mut self) -> Option<Card> {
+    // Deal one card from the top of the deck
+    pub fn deal_one_card(&mut self) -> Option<Card> {
         self.cards.pop()
     }
 
+    // Reset the deck back to the original 52 cards
+    pub fn reset(&mut self) {
+        self.cards = self.original_deck.clone();
+        self.shuffle();
+    }
+
+    // Display the remaining cards in the deck
+    pub fn display_remaining_cards(&self) {
+        for card in &self.cards {
+            println!("{}{}", card.rank, card.suit);
+        }
+    }
+}
+
+fn main() {
+    // Create a new deck
+    let mut deck = Deck::new();
+    
+    // Shuffle the deck
+    deck.shuffle();
+    println!("Deck shuffled!");
+
+    // Display all remaining cards in the deck
+    println!("Remaining cards in the deck:");
+    deck.display_remaining_cards();
+
+    // Deal one card
+    if let Some(card) = deck.deal_one_card() {
+        println!("Dealt card: {}{}", card.rank, card.suit);
+    } else {
+        println!("No cards left to deal!");
+    }
+
+    // Display remaining cards after dealing
+    println!("Remaining cards after dealing one card:");
+    deck.display_remaining_cards();
+
+    // Reset the deck
+    deck.reset();
+    println!("Deck reset!");
+
+    // Display the deck after resetting
+    println!("Deck after reset:");
+    deck.display_remaining_cards();
 }
