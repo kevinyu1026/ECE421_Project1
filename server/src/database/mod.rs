@@ -1,3 +1,5 @@
+//! Database module to handle player registration,player stats and login using SQLite
+
 use rusqlite::{Connection, Result};
 use uuid::Uuid;
 
@@ -49,18 +51,19 @@ impl Database {
         }
     }
 
-    pub fn get_player(&self, id: &str) -> Result<Option<Player>> {
-        let mut stmt = self.conn.prepare("SELECT id, name FROM players WHERE id = ?1")?;
-        let mut rows = stmt.query([id])?;
-
-        if let Some(row) = rows.next()? {
-            Ok(Some(Player {
-                id: row.get(0)?,
-                name: row.get(1)?,
-            }))
-        } else {
-            Ok(None)
-        }
+    pub fn player_stats(&self, player_id: &str) -> Result<PlayerStats> {
+        let mut stmt = self.conn.prepare(
+            "SELECT COUNT(*) AS games_played, SUM(won) AS games_won
+            FROM games
+            WHERE player_id = ?1",
+        )?;
+        let stats = stmt.query_row([player_id], |row| {
+            Ok(PlayerStats {
+                games_played: row.get(0)?,
+                games_won: row.get(1)?,
+            })
+        })?;
+        Ok(stats)
     }
 
     pub fn list_players(&self) -> Result<Vec<Player>> {
