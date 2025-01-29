@@ -13,9 +13,9 @@ High-Level Server Functional Requirements (S-FRs)
 * S-FR-1: Support multiple poker variants as listed in Table 1.
 * S-FR-2: Betting may be supported 
 * S-FR-3: Track statistics for each player.
-* S-FR-4: Provide player statistics on request.
+* S-FR-4: Provide player statistics on request. 
 * S-FR-5: Support 2 to 10 players per game (unless a variant supports a single player).
-* S-FR-6: Use a standard deck of 52 cards, including jokers when required by the variant.
+* S-FR-6: Use a standard deck of 52 cards, including jokers when required by the variant. (Done)
 * S-FR-7: Ensure players have unique identifiers (IDs).
 * S-FR-8: Number each game sequentially starting from zero (0).
 * S-FR-9: Allow the game numbering to be reset to zero (0).
