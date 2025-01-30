@@ -1,6 +1,6 @@
 //! Database module to handle player registration,player stats and login using SQLite
 
-use rusqlite::{Connection, Result};
+use sqlx::sqlite::SqlitePool;
 use uuid::Uuid;
 
 #[derive(Debug)]

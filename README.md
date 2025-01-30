@@ -16,7 +16,7 @@ High-Level Server Functional Requirements (S-FRs)
 * S-FR-4: Provide player statistics on request. 
 * S-FR-5: Support 2 to 10 players per game (unless a variant supports a single player).
 * S-FR-6: Use a standard deck of 52 cards, including jokers when required by the variant. (Done)
-* S-FR-7: Ensure players have unique identifiers (IDs).
+* S-FR-7: Ensure players have unique identifiers (IDs). (Done)
 * S-FR-8: Number each game sequentially starting from zero (0).
 * S-FR-9: Allow the game numbering to be reset to zero (0).
 * S-FR-10: Resetting the game numbering must clear retained player information.
