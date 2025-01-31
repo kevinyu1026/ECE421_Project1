@@ -1,1 +1,1 @@
-/Users/kevinyu/ece421/ECE421_Project1/server/target/debug/server: /Users/kevinyu/ece421/ECE421_Project1/server/src/database/mod.rs /Users/kevinyu/ece421/ECE421_Project1/server/src/game/mod.rs /Users/kevinyu/ece421/ECE421_Project1/server/src/main.rs
+/home/ajchan/ECE421/ECE421_Project1/server/target/debug/server: /home/ajchan/ECE421/ECE421_Project1/server/src/database/mod.rs /home/ajchan/ECE421/ECE421_Project1/server/src/game/mod.rs /home/ajchan/ECE421/ECE421_Project1/server/src/main.rs

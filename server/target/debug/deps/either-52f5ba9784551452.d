@@ -1,0 +1,11 @@
+/home/ajchan/ECE421/ECE421_Project1/server/target/debug/deps/libeither-52f5ba9784551452.rmeta: /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/lib.rs /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/serde_untagged.rs /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/serde_untagged_optional.rs /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/iterator.rs /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/into_either.rs
+
+/home/ajchan/ECE421/ECE421_Project1/server/target/debug/deps/libeither-52f5ba9784551452.rlib: /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/lib.rs /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/serde_untagged.rs /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/serde_untagged_optional.rs /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/iterator.rs /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/into_either.rs
+
+/home/ajchan/ECE421/ECE421_Project1/server/target/debug/deps/either-52f5ba9784551452.d: /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/lib.rs /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/serde_untagged.rs /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/serde_untagged_optional.rs /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/iterator.rs /home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/into_either.rs
+
+/home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/lib.rs:
+/home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/serde_untagged.rs:
+/home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/serde_untagged_optional.rs:
+/home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/iterator.rs:
+/home/ajchan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/either-1.13.0/src/into_either.rs:
