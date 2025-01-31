@@ -1,28 +1,28 @@
+mod database;
+
 use warp::Filter;
-use tokio::sync::{mpsc, Mutex};
+use std::sync::Arc;
+use database::Database;
 use warp::ws::{Message, WebSocket};
 use futures_util::{StreamExt, SinkExt};
-use sqlx::{SqlitePool, query};
-use serde::{Serialize, Deserialize};
+use tokio::sync::{mpsc, Mutex};
+use sqlx::SqlitePool;
 use std::collections::HashMap;
-use std::sync::Arc;
-use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize)]
-struct Player {
-    id: String,
-    name: String,
-}
-
-struct ServerState {
+struct Lobby {
     players: Mutex<HashMap<String, mpsc::UnboundedSender<Message>>>,
 }
 
-impl ServerState {
+impl Lobby {
     fn new() -> Self {
-        ServerState {
+        Lobby {
             players: Mutex::new(HashMap::new()),
         }
+    }
+
+    async fn add_player(&self, username: String, tx: mpsc::UnboundedSender<Message>) {
+        let mut players = self.players.lock().await;
+        players.insert(username, tx);
     }
 }
 
@@ -32,18 +32,27 @@ async fn main() {
         .await
         .expect("Failed to connect to database");
 
-    let state = Arc::new(ServerState::new());
+    let database = Arc::new(Database::new(db_pool.clone()));
+    let lobby = Arc::new(Lobby::new());
 
     let register_route = warp::path("ws")
         .and(warp::ws())
-        .and(with_state(state.clone()))
-        .and(with_db(db_pool.clone()))
-        .map(|ws: warp::ws::Ws, state, db| ws.on_upgrade(move |socket| handle_connection(socket, state, db)));
+        .and(with_db(database.clone()))
+        .and(with_lobby(lobby.clone()))
+        .map(|ws: warp::ws::Ws, db, lobby| ws.on_upgrade(move |socket| handle_connection(socket, db, lobby)));
 
-    warp::serve(register_route).run(([10, 0, 0, 195], 3030)).await;
+    warp::serve(register_route).run(([0, 0, 0, 0], 3030)).await;
 }
 
-async fn handle_connection(ws: WebSocket, state: Arc<ServerState>, db: SqlitePool) {
+fn with_db(db: Arc<Database>) -> impl Filter<Extract = (Arc<Database>,), Error = std::convert::Infallible> + Clone {
+    warp::any().map(move || db.clone())
+}
+
+fn with_lobby(lobby: Arc<Lobby>) -> impl Filter<Extract = (Arc<Lobby>,), Error = std::convert::Infallible> + Clone {
+    warp::any().map(move || lobby.clone())
+}
+
+async fn handle_connection(ws: WebSocket, db: Arc<Database>, lobby: Arc<Lobby>) {
     let (mut ws_tx, mut ws_rx) = ws.split();
     let (tx, mut rx) = mpsc::unbounded_channel();
 
@@ -53,34 +62,64 @@ async fn handle_connection(ws: WebSocket, state: Arc<ServerState>, db: SqlitePoo
         }
     });
 
-    while let Some(Ok(msg)) = ws_rx.next().await {
-        if let Ok(text) = msg.to_str() {
-            let player_name = text.trim().to_string();
-            let player_id = Uuid::new_v4().to_string();
+    let menu_msg = Message::text("Welcome to Poker! Choose an option:\n1. Login\n2. Register\n3. Exit");
+    tx.send(menu_msg).unwrap();
 
-            // Insert into the database
-            sqlx::query("INSERT INTO players (id, name) VALUES (?1, ?2)")
-                .bind(&player_id)
-                .bind(&player_name)
-                .execute(&db)
-                .await
-                .expect("DB insert failed");
+    if let Some(Ok(msg)) = ws_rx.next().await {
+        if let Ok(choice) = msg.to_str() {
+            match choice.trim() {
+                "1" => {
+                    let prompt_msg = Message::text("Enter your username:");
+                    tx.send(prompt_msg).unwrap();
 
-            // Store player connection in the server state
-            let mut players = state.players.lock().await;
-            players.insert(player_name.clone(), tx.clone());
+                    if let Some(Ok(username_msg)) = ws_rx.next().await {
+                        if let Ok(username) = username_msg.to_str() {
+                            let username = username.trim().to_string();
+                            match db.login_player(&username).await {
+                                Ok(Some(_id)) => {
+                                    let success_msg = Message::text(format!("Welcome back, {}! You are now in the lobby.", username));
+                                    tx.send(success_msg).unwrap();
+                                    lobby.add_player(username, tx).await;
+                                }
+                                _ => {
+                                    let error_msg = Message::text("Username not found. Try again.");
+                                    tx.send(error_msg).unwrap();
+                                }
+                            }
+                        }
+                    }
+                }
+                "2" => {
+                    let prompt_msg = Message::text("Enter a new username to register:");
+                    tx.send(prompt_msg).unwrap();
 
-            // Send a welcome message to the player
-            let welcome_msg = Message::text(format!("Welcome, {}! You are registered.", player_name));
-            tx.send(welcome_msg).unwrap();
+                    if let Some(Ok(username_msg)) = ws_rx.next().await {
+                        if let Ok(username) = username_msg.to_str() {
+                            let username = username.trim().to_string();
+                            match db.register_player(&username).await {
+                                Ok(_) => {
+                                    let success_msg = Message::text(format!("Registration successful! Welcome, {}! You are now in the lobby.", username));
+                                    tx.send(success_msg).unwrap();
+                                    lobby.add_player(username, tx).await;
+                                }
+                                Err(_) => {
+                                    let error_msg = Message::text("Registration failed. Try again.");
+                                    tx.send(error_msg).unwrap();
+                                }
+                            }
+                        }
+                    }
+                }
+                "3" => {
+                    let goodbye_msg = Message::text("Goodbye!");
+                    tx.send(goodbye_msg).unwrap();
+                    return;
+                }
+                _ => {
+                    let invalid_msg = Message::text("Invalid option. Please restart and choose 1, 2, or 3.");
+                    tx.send(invalid_msg).unwrap();
+                }
+            }
         }
     }
-}
-
-fn with_state(state: Arc<ServerState>) -> impl Filter<Extract = (Arc<ServerState>,), Error = std::convert::Infallible> + Clone {
-    warp::any().map(move || state.clone())
-}
-
-fn with_db(db: SqlitePool) -> impl Filter<Extract = (SqlitePool,), Error = std::convert::Infallible> + Clone {
-    warp::any().map(move || db.clone())
 }
